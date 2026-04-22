@@ -54,6 +54,7 @@ class LineChart extends HTMLElement {
                         grid: { display: false },
                     },
                     y: {
+                        beginAtZero: true,
                         title: {
                             display: true,
                             text: "Despesas",
@@ -61,28 +62,43 @@ class LineChart extends HTMLElement {
                         },
                         ticks: {
                             color: systemColors.text,
-                            stepSize: 50_000_000,
                             callback: function (value) {
                                 if (typeof value === "number") {
-                                    const formatted =
-                                        BRLCurrencyFormatter.formatToParts(
-                                            value,
-                                        )
-                                            .slice(1, 3)
-                                            .map(({ type, value }) => value)
-                                            .join("");
+                                    const partitioned = BRLCurrencyFormatter.formatToParts(
+                                        value,
+                                    );
+                                    const formatted = partitioned
+                                        .slice(1, 3)
+                                        .map(({ type, value }) => value)
+                                        .join("");
 
-                                    return value === 0
-                                        ? formatted
-                                        : formatted + " M";
+                                    const suffix = function(value, decimal_places)
+                                    {
+                                        switch (decimal_places)
+                                        {
+                                            case 2:
+                                                return (value).toString() + " K";
+                                            case 3:
+                                                return (value).toString() + " M";
+                                            case 4:
+                                                return (value).toString() + " B";
+                                            case 5:
+                                                return (value).toString() + " T";
+                                            default:
+                                                return (value).toString();
+                                        }
+                                    }
+
+                                    return suffix(
+                                            formatted,
+                                            partitioned.filter(({ type, value }) => type === 'integer').length
+                                        );
                                 }
 
                                 return value;
                             },
                         },
-                        grid: {
-                            color: systemColors.text,
-                        },
+                        grid: { color: systemColors.text },
                     },
                 },
                 interaction: {
@@ -90,14 +106,11 @@ class LineChart extends HTMLElement {
                     intersect: true,
                 },
                 onClick: (e) => {
-                    const canvasPosition = getRelativePosition(e, chart);
+                    const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
                     const selectedDate = chart.scales.x
                         .getLabelForValue(
                             chart.scales.x.getValueForPixel(canvasPosition.x),
                         )
-                        .split("/")
-                        .toReversed()
-                        .join("-");
 
                     console.log(selectedDate);
                 },

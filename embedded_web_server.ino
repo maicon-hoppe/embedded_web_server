@@ -150,17 +150,8 @@ void handleBarChart()
 
 void handleData()
 {
-  // JsonDocument coutries_data_filter;
-  // coutries_data_filter[0]["series"]["serie"][0] = true;
-
-  // SimpleAPI* IBGEDataAPI = new SimpleAPI(
-    // "https://servicodados.ibge.gov.br/api/v1/paises/BR/indicadores/77849",
-    // &coutries_data_filter
-  // );
-
   HTTPClient http;
   http.begin("https://servicodados.ibge.gov.br/api/v1/paises/BR/indicadores/77849");
-  // http.setAcceptEncoding("identity");
   int code = http.GET();
 
   String response = http.getString();
