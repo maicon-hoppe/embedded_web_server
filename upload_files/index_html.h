@@ -12,7 +12,7 @@ const static char index_html_str[] = R"EOF(
     <script defer type="module" src="static/utils.js"></script>
     <script defer type="module" src="line_chart.js"></script>
     <script defer type="module" src="bar_chart.js"></script>
-    <script defer src="static/index.js"></script>
+    <script defer type="module" src="static/index.js"></script>
     <title>Pagina</title>
 </head>
 <body>
