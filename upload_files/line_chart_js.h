@@ -2,7 +2,9 @@
 #define UNIQUE_LINE_CHART_JS
 
 const static char line_chart_js_str[] = R"EOF(
-import { BRLCurrencyFormatter, BRLDateFormatter, systemColors } from "./static/utils.js";
+"use strict";
+
+import { BRLCurrencyFormatter, BRLDateFormatter, systemColors } from "./utils.js";
 
 const thisMonth = new Date().toLocaleDateString("pt-BR", {
     month: "long",
@@ -54,7 +56,7 @@ class LineChart extends HTMLElement {
                         grid: { display: false },
                     },
                     y: {
-                        beginAtZero: true,
+                        beginAtZero: JSON.parse(this.dataset.beginAtZero),
                         title: {
                             display: true,
                             text: "Despesas",
@@ -72,6 +74,7 @@ class LineChart extends HTMLElement {
                                         .map(({ type, value }) => value)
                                         .join("");
 
+                                    const decimal_places = partitioned.filter(({ type, value }) => type === 'integer').length;
                                     const suffix = function(value, decimal_places)
                                     {
                                         switch (decimal_places)
@@ -89,14 +92,18 @@ class LineChart extends HTMLElement {
                                         }
                                     }
 
-                                    return suffix(
+                                    return decimal_places > 1 ?
+                                        suffix(
                                             formatted,
-                                            partitioned.filter(({ type, value }) => type === 'integer').length
-                                        );
+                                            decimal_places
+                                        )
+                                    :
+                                        value
                                 }
 
                                 return value;
                             },
+                            stepSize: this.dataset.stepSize ? JSON.parse(this.dataset.stepSize) : undefined,
                         },
                         grid: { color: systemColors.text },
                     },

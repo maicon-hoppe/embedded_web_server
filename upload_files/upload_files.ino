@@ -20,9 +20,9 @@ void setup() {
   fs::File htmx = FFat.open("/static/htmx.min.js", FILE_WRITE);
   fs::File utils_js = FFat.open("/static/utils.js", FILE_WRITE);
   fs::File index_js = FFat.open("/static/index.js", FILE_WRITE);
-  fs::File line_chart_js = FFat.open("/line_chart.js", FILE_WRITE);
-  fs::File bar_chart_js = FFat.open("/bar_chart.js", FILE_WRITE);
-  
+  fs::File line_chart_js = FFat.open("/static/line_chart.js", FILE_WRITE);
+  fs::File bar_chart_js = FFat.open("/static/bar_chart.js", FILE_WRITE);
+
   const static char FILE_WRITE_TAG[11] = "FILE_WRITE";
   if (index_html.print(index_html_str) == (sizeof(index_html_str) - 1))
   {

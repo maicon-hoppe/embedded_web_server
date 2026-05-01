@@ -2,6 +2,8 @@
 #define UNIQUE_UTILS_JS
 
 const static char utils_js_str[] = R"EOF(
+"use strict";
+
 export const BRLCurrencyFormatter = new Intl.NumberFormat(
     "pt-BR",
     {
@@ -113,10 +115,6 @@ export class BasicIndexedDB {
             {
                 dataCallback(dbData);
             }
-
-            // Em vez de retornar os dados,
-            // receber uma função como argumento que trata dos dados
-            // Também usar strict
         }
     }
 

@@ -1,10 +1,11 @@
+#include <string.h>
+
 #include <ESPmDNS.h>
 #include <FFat.h>
 #include <FS.h>
+#include <HTTPClient.h>
 #include <WebServer.h>
 #include <WiFi.h>
-
-#include <HTTPClient.h>
 
 #include "secrets.h"
 
@@ -90,8 +91,8 @@ void setup() {
 
   server.on("/", HTTP_GET, handleRoot);
   server.on("/place", HTTP_GET, handlePlace);
-  server.on("/line_chart.js", HTTP_GET, handleLineChart);
-  server.on("/bar_chart.js", HTTP_GET, handleBarChart);
+  server.on("/line_chart", HTTP_GET, handleLineChart);
+  server.on("/bar_chart", HTTP_GET, handleBarChart);
   server.on("/data", HTTP_GET, handleData);
   server.onNotFound(handleNotFound);
 
@@ -118,7 +119,8 @@ void handlePlace()
   fs::File content = FFat.open("/index.html", "r");
   listDir(FFat, "/", 2);
 
-  server.send(200, "text/html", "<h1>Olá Maicon</h1><hr>");
+  String buffer = WebServer::urlDecode("%5B1%2C2%2C3%5D");
+  server.send(200, "text/html", buffer);
   if (content)
   {
     static const char TAG[5] = "HTML";
@@ -130,22 +132,139 @@ void handlePlace()
 
 void handleLineChart()
 {
-  fs::File line_chart_js = FFat.open("/line_chart.js", FILE_READ);
-  if (line_chart_js)
+  String chart_title = "GRÁFICO";
+  if (server.hasArg("title"))
   {
-    server.send(200, "text/javascript", line_chart_js.readString());
+    chart_title = server.arg("title");
   }
-  line_chart_js.close();
+
+  String chart_begin_at_zero = "true";
+  if (server.hasArg("begin_at_zero"))
+  {
+    chart_begin_at_zero = server.arg("begin_at_zero");
+  }
+
+  String chart_display_points = "false";
+  if (server.hasArg("display_points"))
+  {
+    chart_display_points = server.arg("display_points");
+  }
+
+  String chart_labels = "[&quot;Janeiro&quot;, &quot;Fevereiro&quot;]";
+  String chart_coordinate_label = "&quot;Value&quot;";
+  String chart_coordinates = "[{&quot;x&quot;: 1, &quot;y&quot;: 2}, {&quot;x&quot;: 2, &quot;y&quot;: 1}]";
+  String chart_data = "{&quot;labels&quot;: "
+                      + chart_labels
+                      + ", &quot;datasets&quot;: [{&quot;label&quot;: "
+                      + chart_coordinate_label
+                      + ", &quot;data&quot;: "
+                      + chart_coordinates
+                      + "}]}";
+  if (server.hasArg("labels") && server.hasArg("coordinate_label") && server.hasArg("coordinates"))
+  {
+    chart_labels = WebServer::urlDecode(server.arg("labels"));
+    chart_coordinate_label = server.arg("coordinate_label");
+    chart_coordinates = WebServer::urlDecode(server.arg("coordinates"));
+    chart_data = "{&quot;labels&quot;: ";
+    chart_data.concat(chart_labels);
+    chart_data.concat(", &quot;datasets&quot;: [{&quot;label&quot;: ");
+    chart_data.concat(chart_coordinate_label);
+    chart_data.concat(", &quot;data&quot;: ");
+    chart_data.concat(chart_coordinates);
+    chart_data.concat("}]}");
+  }
+
+  size_t buffer_size = 500;
+  char line_chart_html[buffer_size];
+
+  if (server.hasArg("step_size"))
+  {
+    snprintf(
+      line_chart_html, buffer_size, 
+      "<line-chart \
+        data-title=\"%s\" \
+        data-begin-at-zero=\"%s\" \
+        data-display-points=\"%s\" \
+        data-step-size=\"%s\" \
+        data-chart-data=\"%s\" \
+      ></line-chart>",
+      chart_title.c_str(),
+      chart_begin_at_zero.c_str(),
+      chart_display_points.c_str(),
+      server.arg("step_size").c_str(),
+      chart_data.c_str()
+    );
+  }
+  else
+  {
+    snprintf(
+      line_chart_html, buffer_size, 
+      "<line-chart data-title=\"%s\" data-begin-at-zero=\"%s\" data-display-points=\"%s\" data-chart-data=\"%s\"></line-chart>",
+      chart_title.c_str(),
+      chart_begin_at_zero.c_str(),
+      chart_display_points.c_str(),
+      chart_data.c_str()
+    );
+  }
+
+  server.send(200, "text/html", line_chart_html);
 }
 
 void handleBarChart()
 {
-  fs::File bar_chart_js = FFat.open("/bar_chart.js", FILE_READ);
-  if (bar_chart_js)
+  String chart_title = "GRÁFICO";
+  if (server.hasArg("title"))
   {
-    server.send(200, "text/javascript", bar_chart_js.readString());
+    chart_title = server.arg("title");
   }
-  bar_chart_js.close();
+
+  String chart_labels = "[&quot;Janeiro&quot;, &quot;Fevereiro&quot;]";
+  String chart_coordinate_label = "&quot;Value&quot;";
+  String chart_coordinates = "[{&quot;x&quot;: 1, &quot;y&quot;: 2}, {&quot;x&quot;: 2, &quot;y&quot;: 1}]";
+  String chart_data = "{&quot;labels&quot;: "
+                      + chart_labels
+                      + ", &quot;datasets&quot;: [{&quot;label&quot;: "
+                      + chart_coordinate_label
+                      + ", &quot;data&quot;: "
+                      + chart_coordinates
+                      + "}]}";
+  if (server.hasArg("labels") && server.hasArg("coordinate_label") && server.hasArg("coordinates"))
+  {
+    chart_labels = WebServer::urlDecode(server.arg("labels"));
+    chart_coordinate_label = server.arg("coordinate_label");
+    chart_coordinates = WebServer::urlDecode(server.arg("coordinates"));
+    chart_data = "{&quot;labels&quot;: ";
+    chart_data.concat(chart_labels);
+    chart_data.concat(", &quot;datasets&quot;: [{&quot;label&quot;: ");
+    chart_data.concat(chart_coordinate_label);
+    chart_data.concat(", &quot;data&quot;: ");
+    chart_data.concat(chart_coordinates);
+    chart_data.concat("}]}");
+  }
+
+  size_t buffer_size = 500;
+  char bar_chart_html[buffer_size];
+  if (server.hasArg("step_size"))
+  {
+    snprintf(
+      bar_chart_html, buffer_size, 
+      "<bar-chart data-title=\"%s\" data-step-size=\"%s\" data-chart-data=\"%s\"></bar-chart>",
+      chart_title.c_str(),
+      server.arg("step_size").c_str(),
+      chart_data.c_str()
+    );
+  }
+  else
+  {
+    snprintf(
+      bar_chart_html, buffer_size, 
+      "<bar-chart data-title=\"%s\" data-chart-data=\"%s\"></bar-chart>",
+      chart_title.c_str(),
+      chart_data.c_str()
+    );
+  }
+
+  server.send(200, "text/html", bar_chart_html);
 }
 
 void handleData()
@@ -159,7 +278,6 @@ void handleData()
   server.send(200, "application/json", response);
 
   http.end();
-  // delete IBGEDataAPI;
 }
 
 void handleNotFound()

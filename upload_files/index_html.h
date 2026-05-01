@@ -10,9 +10,10 @@ const static char index_html_str[] = R"EOF(
     <script src="static/chart.umd.min.js"></script>
     <script src="static/htmx.min.js"></script>
     <script defer type="module" src="static/utils.js"></script>
-    <script defer type="module" src="line_chart.js"></script>
-    <script defer type="module" src="bar_chart.js"></script>
+    <script defer type="module" src="static/line_chart.js"></script>
+    <script defer type="module" src="static/bar_chart.js"></script>
     <script defer type="module" src="static/index.js"></script>
+    <link rel="stylesheet" href="static/global.css">
     <title>Pagina</title>
 </head>
 <body>
@@ -27,6 +28,22 @@ const static char index_html_str[] = R"EOF(
         inima obcaecati commodi soluta. Inventore quae voluptatum saepe totam libero, provident
         autem, est incidunt qui vitae dolor culpa?
     </p>
+    <button
+        hx-get="/line_chart?step_size=1"
+        hx-trigger="click once"
+        hx-target="this"
+        hx-swap="outerHTML"
+    >
+        FOO BAR
+    </button>
+    <button
+        hx-get="/bar_chart?step_size=1"
+        hx-trigger="click once"
+        hx-target="this"
+        hx-swap="outerHTML"
+    >
+        COISA BARRA
+    </button>
 </body>
 </html>)EOF";
 

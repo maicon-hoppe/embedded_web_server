@@ -2,7 +2,9 @@
 #define UNIQUE_BAR_CHART_JS
 
 const static char bar_chart_js_str[] = R"EOF(
-import { systemColors } from "./static/utils.js";
+"use strict";
+
+import { systemColors } from "./utils.js";
 
 class BarChart extends HTMLElement {
     constructor() {
@@ -17,15 +19,7 @@ class BarChart extends HTMLElement {
     connectedCallback()
     {
         const chartCanvas = this.shadowRoot.querySelector("canvas");
-        const chartData = {
-            labels: JSON.parse(this.dataset.xLabels),
-            datasets: [
-                {
-                    label: this.dataset.yLabel,
-                    data: JSON.parse(this.dataset.coordinates),
-                },
-            ],
-        };
+        const chartData = JSON.parse(this.dataset.chartData);
 
         const chart = new Chart(chartCanvas, {
             type: 'bar',
@@ -50,13 +44,14 @@ class BarChart extends HTMLElement {
                         grid: { display: false },
                     },
                     y: {
+                        beginAtZero: true,
                         title: {
                             display: true,
                             text: "Quantidade de contratos",
                             color: systemColors.text,
                         },
                         ticks: {
-                            stepSize: 100,
+                            stepSize: this.dataset.stepSize ? JSON.parse(this.dataset.stepSize) : undefined,
                             color: systemColors.text,
                         },
                         grid: {
