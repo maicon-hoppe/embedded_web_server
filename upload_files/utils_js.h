@@ -44,7 +44,7 @@ export class BasicIndexedDB {
             DBOpenRequest.onupgradeneeded = (event) =>
             {
                 const db = event.target.result;
-
+ 
                 db.onerror = () => { console.log("Cannot create database"); }
 
                 for (const objectName of this.objectStoreNames)
@@ -92,56 +92,69 @@ export class BasicIndexedDB {
         }
     }
 
-    useData(dataCallback)
+    promiseAllData()
     {
-        const dbData = {};
-
-        const DBOpenRequest = indexedDB.open(this.dbName, 1);
-        DBOpenRequest.onsuccess = (event) =>
+        return new Promise((resolve, reject) =>
         {
-            this.#db = event.target.result;
+            const dbData = {};
 
-            const dbReadTransaction = this.#db.transaction(this.objectStoreNames, "readonly");
-            for (const storeName of this.objectStoreNames)
-            {
-                const objectStore = dbReadTransaction.objectStore(storeName);
-                objectStore.getAll().onsuccess = (event) =>
-                {
-                    dbData[storeName] = event.target.result;
-                }
-            }
-
-            dbReadTransaction.oncomplete = (event) =>
-            {
-                dataCallback(dbData);
-            }
-        }
-    }
-
-    isEmpty()
-    {
-        const rowCount = [];
-
-        if (this.objectStoreNames.length > 0)
-        {
             const DBOpenRequest = indexedDB.open(this.dbName, 1);
             DBOpenRequest.onsuccess = (event) =>
             {
                 this.#db = event.target.result;
-                const dbReadTransaction = this.#db.transaction(this.objectStoreNames, "readonly");
-                for (const storeName of this.objectStoreNames)
+                const localObjectStoreNames = Array.from(this.#db.objectStoreNames);
+                const dbReadTransaction = this.#db.transaction(localObjectStoreNames, "readonly");
+                for (const storeName of localObjectStoreNames)
                 {
                     const objectStore = dbReadTransaction.objectStore(storeName);
-                    objectStore.count().onsuccess = (event) =>
+                    objectStore.getAll().onsuccess = (event) =>
                     {
-                        rowCount.push(event.target.result);
+                        dbData[storeName] = event.target.result;
                     }
                 }
-            }
-        }
-        else { rowCount.push(0); }
 
-        return rowCount.every(rowSize => rowSize === 0);
+                dbReadTransaction.oncomplete = (event) => { resolve(dbData) };
+            }
+        });
+    }
+
+    promiseIsEmpty()
+    {
+        return new Promise((resolve, reject) =>
+        {
+            const rowCount = [];
+
+            const DBOpenRequest = indexedDB.open(this.dbName, 1);
+            DBOpenRequest.onsuccess = (event) =>
+            {
+                this.#db = event.target.result;
+                const localObjectStoreNames = Array.from(this.#db.objectStoreNames);
+                if (localObjectStoreNames.length > 0)
+                {
+                    const dbReadTransaction = this.#db.transaction(localObjectStoreNames, "readonly");
+                    for (const storeName of localObjectStoreNames)
+                    {
+                        const objectStore = dbReadTransaction.objectStore(storeName);
+                        objectStore.count().onsuccess = (event) =>
+                        {
+                            rowCount.push(event.target.result);
+                        }
+                    }
+
+                    dbReadTransaction.oncomplete = (event) =>
+                    {
+                        this.#db.close();
+                        resolve(rowCount.every(rowSize => rowSize === 0));
+                    }
+                }
+                else
+                {
+                    this.#db.close();
+                    const deleteRequest = indexedDB.deleteDatabase(this.dbName);
+                    deleteRequest.onsuccess = (event) => { resolve(true) };
+                }
+            }
+        });
     }
 };
 )EOF";
