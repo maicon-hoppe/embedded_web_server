@@ -106,6 +106,9 @@ void loop() {
 
 void handleRoot()
 {
+  const static char TAG[14] = "ROOT ENDPOINT";
+  ESP_LOGI(TAG, "Hit");
+
   fs::File index = FFat.open("/index.html", FILE_READ);
   if (index)
   {
@@ -116,6 +119,9 @@ void handleRoot()
 
 void handlePlace()
 {
+  const static char TAG[20] = "LINE CHART ENDPOINT";
+  ESP_LOGI(TAG, "Hit");
+
   fs::File content = FFat.open("/index.html", "r");
   listDir(FFat, "/", 2);
 
@@ -132,6 +138,9 @@ void handlePlace()
 
 void handleLineChart()
 {
+  const static char TAG[20] = "LINE CHART ENDPOINT";
+  ESP_LOGI(TAG, "Hit");
+
   String chart_title = "GRÁFICO";
   if (server.hasArg("title"))
   {
@@ -163,18 +172,23 @@ void handleLineChart()
   if (server.hasArg("labels") && server.hasArg("coordinate_label") && server.hasArg("coordinates"))
   {
     chart_labels = WebServer::urlDecode(server.arg("labels"));
+    chart_labels.replace("\"", "&quot;");
+
     chart_coordinate_label = server.arg("coordinate_label");
+
     chart_coordinates = WebServer::urlDecode(server.arg("coordinates"));
+    chart_coordinates.replace("\"", "&quot;");
+
     chart_data = "{&quot;labels&quot;: ";
     chart_data.concat(chart_labels);
-    chart_data.concat(", &quot;datasets&quot;: [{&quot;label&quot;: ");
+    chart_data.concat(", &quot;datasets&quot;: [{&quot;label&quot;: &quot;");
     chart_data.concat(chart_coordinate_label);
-    chart_data.concat(", &quot;data&quot;: ");
+    chart_data.concat("&quot;, &quot;data&quot;: ");
     chart_data.concat(chart_coordinates);
     chart_data.concat("}]}");
   }
 
-  size_t buffer_size = 500;
+  size_t buffer_size = 1000;
   char line_chart_html[buffer_size];
 
   if (server.hasArg("step_size"))
@@ -212,6 +226,9 @@ void handleLineChart()
 
 void handleBarChart()
 {
+  const static char TAG[19] = "BAR CHART ENDPOINT";
+  ESP_LOGI(TAG, "Hit");
+
   String chart_title = "GRÁFICO";
   if (server.hasArg("title"))
   {
@@ -231,18 +248,23 @@ void handleBarChart()
   if (server.hasArg("labels") && server.hasArg("coordinate_label") && server.hasArg("coordinates"))
   {
     chart_labels = WebServer::urlDecode(server.arg("labels"));
+    chart_labels.replace("\"", "&quot;");
+    
     chart_coordinate_label = server.arg("coordinate_label");
+    
     chart_coordinates = WebServer::urlDecode(server.arg("coordinates"));
+    chart_coordinates.replace("\"", "&quot;");
+
     chart_data = "{&quot;labels&quot;: ";
     chart_data.concat(chart_labels);
-    chart_data.concat(", &quot;datasets&quot;: [{&quot;label&quot;: ");
+    chart_data.concat(", &quot;datasets&quot;: [{&quot;label&quot;: &quot;");
     chart_data.concat(chart_coordinate_label);
-    chart_data.concat(", &quot;data&quot;: ");
+    chart_data.concat("&quot;, &quot;data&quot;: ");
     chart_data.concat(chart_coordinates);
     chart_data.concat("}]}");
   }
 
-  size_t buffer_size = 500;
+  size_t buffer_size = 1000;
   char bar_chart_html[buffer_size];
   if (server.hasArg("step_size"))
   {
@@ -269,6 +291,9 @@ void handleBarChart()
 
 void handleData()
 {
+  const static char TAG[14] = "DATA ENDPOINT";
+  ESP_LOGI(TAG, "Hit");
+
   HTTPClient http;
   http.begin("https://servicodados.ibge.gov.br/api/v1/paises/BR/indicadores/77849");
   int code = http.GET();
@@ -282,5 +307,7 @@ void handleData()
 
 void handleNotFound()
 {
+  const static char TAG[19] = "NOT FOUND ENDPOINT";
+  ESP_LOGI(TAG, "Hit");
   server.send(404, "text/plain", "No content!");
 }

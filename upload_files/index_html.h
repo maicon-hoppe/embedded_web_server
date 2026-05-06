@@ -22,13 +22,14 @@ const static char index_html_str[] = R"EOF(
             <canvas id="graph"></canvas>
         </div>
     </template>
-    <h1>Página HTML</h1>
+    <h1>Estatísticas</h1>
     <hr>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Modi velit expedita exercitationem 
-        inima obcaecati commodi soluta. Inventore quae voluptatum saepe totam libero, provident
-        autem, est incidunt qui vitae dolor culpa?
-    </p>
-    <button
+
+    <input id="ipea_data_text" type="text">
+    <input id="ipea_data_button" class="default-button" type="button" value="Enviar">
+
+    <p id="comentario"></p>
+    <button class="default-button"
         hx-get="/line_chart?step_size=1"
         hx-trigger="click once"
         hx-target="this"
@@ -36,7 +37,7 @@ const static char index_html_str[] = R"EOF(
     >
         FOO BAR
     </button>
-    <button
+    <button class="default-button"
         hx-get="/bar_chart?step_size=1"
         hx-trigger="click once"
         hx-target="this"

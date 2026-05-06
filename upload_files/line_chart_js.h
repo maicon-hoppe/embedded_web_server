@@ -4,7 +4,10 @@
 const static char line_chart_js_str[] = R"EOF(
 "use strict";
 
-import { BRLCurrencyFormatter, BRLDateFormatter, systemColors } from "./utils.js";
+import {
+    BRLCurrencyFormatter, BRLDateFormatter,
+    systemColors, darkTheme
+} from "./utils.js";
 
 const thisMonth = new Date().toLocaleDateString("pt-BR", {
     month: "long",
@@ -131,6 +134,19 @@ class LineChart extends HTMLElement {
                     tooltip: { display: true },
                 },
             },
+        });
+
+        darkTheme.addEventListener('change', (event) => {
+            chart.options.scales.x.title.color = event.matches ? "hsl(0 0 90)" : "hsl(0 0 10)";
+            chart.options.scales.x.ticks.color = event.matches ? "hsl(0 0 90)" : "hsl(0 0 10)";
+
+            chart.options.scales.y.title.color = event.matches ? "hsl(0 0 90)" : "hsl(0 0 10)";
+            chart.options.scales.y.ticks.color = event.matches ? "hsl(0 0 90)" : "hsl(0 0 10)";
+            chart.options.scales.y.grid.color = event.matches ? "hsl(0 0 90)" : "hsl(0 0 10)";
+
+            chart.options.plugins.title.color = event.matches ? "hsl(0 0 90)" : "hsl(0 0 10)";
+
+            chart.update();
         });
     }
 }

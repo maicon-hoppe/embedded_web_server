@@ -203,6 +203,79 @@ IBGEDB.promiseIsEmpty().then((dbIsEmpty) =>
         });
     }
 });
+
+const ipeaDataText = document.querySelector("#ipea_data_text");
+const ipeaDataButton = document.querySelector("#ipea_data_button");
+const ipeaComent = document.querySelector("#comentario");
+
+const territories = {};
+const ipeaSeriesValues = {};
+let chartTitle;
+
+const getData = async function(event)
+{
+    const response = await fetch(`http://www.ipeadata.gov.br/api/odata4/Metadados('${ipeaDataText.value}')`);
+    const ipeaData = await response.json();
+
+    chartTitle = (ipeaData.value[0].SERNOME + " " + ipeaData.value[0].UNINOME).toUpperCase();
+
+    if (ipeaData.value.length > 0)
+    {
+        ipeaComent.innerHTML = ipeaData.value[0].SERCOMENTARIO;
+
+        const responseSeries = await fetch(`http://www.ipeadata.gov.br/api/odata4/Metadados('${ipeaDataText.value}')/Valores`);
+        const ipeaSeries = await responseSeries.json();
+
+        for (const dataEntry of ipeaSeries.value)
+        {
+            if (!territories[dataEntry.NIVNOME])
+            {
+                territories[dataEntry.NIVNOME] = [];
+            }
+
+            if (dataEntry.NIVNOME === "Regiões")
+            {
+                ipeaSeriesValues[dataEntry.TERCODIGO] = dataEntry.VALVALOR;
+                let ipeaPlace = territories[dataEntry.NIVNOME].find((TERCODIGO) => TERCODIGO[dataEntry.TERCODIGO]);
+                if (!ipeaPlace)
+                {
+                    const placeResponse = await fetch(
+                        `http://www.ipeadata.gov.br/api/odata4/Territorios(TERCODIGO='${dataEntry.TERCODIGO}',NIVNOME='${dataEntry.NIVNOME}')`
+                    );
+                    const placeData = await placeResponse.json();
+                    territories[dataEntry.NIVNOME].push({ [dataEntry.TERCODIGO]: placeData.value[0].TERNOME });
+                }
+            }
+        }
+
+        const requestURL = "/bar_chart";
+        const BarChartsearchParams = new URLSearchParams();
+        BarChartsearchParams.append("title", chartTitle);
+        BarChartsearchParams.append("labels",
+            JSON.stringify(territories['Regiões'].map(data => Object.values(data)[0]))
+        );
+        BarChartsearchParams.append("coordinate_label", "Porcentagem");
+        BarChartsearchParams.append("coordinates", 
+            JSON.stringify(
+                Object.entries(ipeaSeriesValues)
+                    .map(([key, value]) => ({ x: +key, y: +value }))
+            )
+        );
+
+        const requestShape = requestURL + "?" + BarChartsearchParams.toString();
+        htmx.ajax('GET', requestShape, {
+            target: "#comentario",
+            swap: "afterend"
+        });
+    }
+    else
+    {
+        ipeaComent.innerText = "Nenhum dado encontrado.";
+    }
+}
+
+ipeaDataText.addEventListener("keydown", (event) => { if (event.key === "Enter") { getData() } });
+ipeaDataButton.addEventListener("click", getData);
 )EOF";
 
 #endif

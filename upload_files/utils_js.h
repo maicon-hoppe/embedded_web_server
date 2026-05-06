@@ -17,15 +17,14 @@ export const BRLDateFormatter = new Intl.DateTimeFormat(
     { dateStyle: 'long' }
 );
 
+export const darkTheme = matchMedia('(prefers-color-scheme: dark)');
+
 export const systemColors = {
-    secondaryColor20: "hsl(332, 38%, 65%)",
-    text: false ? "hsl(0 0 90)" : "hsl(0 0 10)",
-    accent: false
-        ? "hsl(37, 100%, 64%)"
-        : "hsl(37, 100%, 34%)",
-    accentTransparent: false
-        ? "hsla(37 100 64 / 0.5)"
-        : "hsla(37 100 34 / 0.5)",
+    primaryColor: "hsl(59, 50%, 39%)",
+    secondaryColor: "hsl(57, 20%, 21%)",
+    text: darkTheme.matches ? "hsl(0 0 90)" : "hsl(0 0 10)",
+    accent: "hsl(59, 100%, 46%)",
+    accentTransparent: "hsla(59 100 46 / 0.5)",
 };
 
 export class BasicIndexedDB {

@@ -65,16 +65,12 @@ class BarChart extends HTMLElement {
                 },
                 onClick: (e) => {
                     const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
-                    const labelValues =
-                        labels[
-                            chart.scales.x.getValueForPixel(canvasPosition.x)
-                        ];
+                    const selectedDate = chart.scales.x
+                        .getLabelForValue(
+                            chart.scales.x.getValueForPixel(canvasPosition.x),
+                        )
 
-                    const selectedExpensesRange = labelValues
-                        .split(" à ")
-                        .map((value) => parseInt(value));
-
-                    console.log(selectedExpensesRange);
+                    console.log(selectedDate);
                 },
                 plugins: {
                     title: {
