@@ -3,9 +3,9 @@
 #include <ESPmDNS.h>
 #include <FFat.h>
 #include <FS.h>
-#include <HTTPClient.h>
 #include <WebServer.h>
 #include <WiFi.h>
+#include <uri/UriBraces.h>
 
 #include "secrets.h"
 
@@ -53,6 +53,8 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
 
 void setup() {
   Serial.begin(921600);
+
+  Serial.print("\n");
   const static char FS_TAG[12] = "FILE SYSTEM";
   while (!FFat.begin())
   {
@@ -93,7 +95,7 @@ void setup() {
   server.on("/place", HTTP_GET, handlePlace);
   server.on("/line_chart", HTTP_GET, handleLineChart);
   server.on("/bar_chart", HTTP_GET, handleBarChart);
-  server.on("/data", HTTP_GET, handleData);
+  server.on(UriBraces("/data/{}"), HTTP_GET, handleData);
   server.onNotFound(handleNotFound);
 
   server.begin();
@@ -147,6 +149,18 @@ void handleLineChart()
     chart_title = server.arg("title");
   }
 
+  String chart_x_title = "Mês";
+  if (server.hasArg("x_title"))
+  {
+    chart_title = server.arg("x_title");
+  }
+
+  String chart_y_title = "Quantidade";
+  if (server.hasArg("y_title"))
+  {
+    chart_title = server.arg("y_title");
+  }
+
   String chart_begin_at_zero = "true";
   if (server.hasArg("begin_at_zero"))
   {
@@ -188,21 +202,54 @@ void handleLineChart()
     chart_data.concat("}]}");
   }
 
-  size_t buffer_size = 1000;
-  char line_chart_html[buffer_size];
+  bool chartShouldHaveContainer = (server.hasArg("contained") && server.arg("contained") == "true");
 
+  size_t buffer_size = 2048;
+  char line_chart_template[buffer_size];
+  char line_chart_html[buffer_size];
   if (server.hasArg("step_size"))
   {
+    if (chartShouldHaveContainer)
+    {
+      snprintf(
+        line_chart_template, buffer_size,
+        "%s %s %s",
+        "<div class=\"chart-container\">",
+        "<line-chart \
+          data-title=\"%s\" \
+          data-x-title=\"%s\" \
+          data-y-title=\"%s\" \
+          data-begin-at-zero=\"%s\" \
+          data-display-points=\"%s\" \
+          data-step-size=\"%s\" \
+          data-chart-data=\"%s\" \
+        ></line-chart>",
+        "</div>"
+      );
+    }
+    else
+    {
+      strncpy(
+        line_chart_template,
+        "<line-chart \
+          data-title=\"%s\" \
+          data-x-title=\"%s\" \
+          data-y-title=\"%s\" \
+          data-begin-at-zero=\"%s\" \
+          data-display-points=\"%s\" \
+          data-step-size=\"%s\" \
+          data-chart-data=\"%s\" \
+        ></line-chart>",
+        247
+      );
+    }
+
     snprintf(
       line_chart_html, buffer_size, 
-      "<line-chart \
-        data-title=\"%s\" \
-        data-begin-at-zero=\"%s\" \
-        data-display-points=\"%s\" \
-        data-step-size=\"%s\" \
-        data-chart-data=\"%s\" \
-      ></line-chart>",
+      line_chart_template,
       chart_title.c_str(),
+      chart_x_title.c_str(),
+      chart_y_title.c_str(),
       chart_begin_at_zero.c_str(),
       chart_display_points.c_str(),
       server.arg("step_size").c_str(),
@@ -211,10 +258,45 @@ void handleLineChart()
   }
   else
   {
+    if (chartShouldHaveContainer)
+    {
+      snprintf(
+        line_chart_template, buffer_size,
+        "%s %s %s",
+        "<div class=\"chart-container\">",
+        "<line-chart \
+          data-title=\"%s\" \
+          data-x-title=\"%s\" \
+          data-y-title=\"%s\" \
+          data-begin-at-zero=\"%s\" \
+          data-display-points=\"%s\" \
+          data-chart-data=\"%s\" \
+        ></line-chart>",
+        "</div>"
+      );
+    }
+    else
+    {
+      strncpy(
+        line_chart_template,
+        "<line-chart \
+          data-title=\"%s\" \
+          data-x-title=\"%s\" \
+          data-y-title=\"%s\" \
+          data-begin-at-zero=\"%s\" \
+          data-display-points=\"%s\" \
+          data-chart-data=\"%s\" \
+        ></line-chart>",
+        216
+      );
+    }
+
     snprintf(
       line_chart_html, buffer_size, 
-      "<line-chart data-title=\"%s\" data-begin-at-zero=\"%s\" data-display-points=\"%s\" data-chart-data=\"%s\"></line-chart>",
+      line_chart_template,
       chart_title.c_str(),
+      chart_x_title.c_str(),
+      chart_y_title.c_str(),
       chart_begin_at_zero.c_str(),
       chart_display_points.c_str(),
       chart_data.c_str()
@@ -235,6 +317,18 @@ void handleBarChart()
     chart_title = server.arg("title");
   }
 
+  String chart_x_title = "Mês";
+  if (server.hasArg("x_title"))
+  {
+    chart_x_title = server.arg("x_title");
+  }
+
+  String chart_y_title = "Quantidade";
+  if (server.hasArg("y_title"))
+  {
+    chart_y_title = server.arg("y_title");
+  }
+
   String chart_labels = "[&quot;Janeiro&quot;, &quot;Fevereiro&quot;]";
   String chart_coordinate_label = "&quot;Value&quot;";
   String chart_coordinates = "[{&quot;x&quot;: 1, &quot;y&quot;: 2}, {&quot;x&quot;: 2, &quot;y&quot;: 1}]";
@@ -251,7 +345,7 @@ void handleBarChart()
     chart_labels.replace("\"", "&quot;");
     
     chart_coordinate_label = server.arg("coordinate_label");
-    
+
     chart_coordinates = WebServer::urlDecode(server.arg("coordinates"));
     chart_coordinates.replace("\"", "&quot;");
 
@@ -264,24 +358,69 @@ void handleBarChart()
     chart_data.concat("}]}");
   }
 
-  size_t buffer_size = 1000;
+  bool chartShouldHaveContainer = (server.hasArg("contained") && server.arg("contained") == "true");
+
+  size_t buffer_size = 2048;
+  char bar_chart_template[buffer_size];
   char bar_chart_html[buffer_size];
   if (server.hasArg("step_size"))
   {
+    if (chartShouldHaveContainer)
+    {
+      snprintf(
+        bar_chart_template, buffer_size,
+        "%s %s %s",
+        "<div class=\"chart-container\">",
+        "<bar-chart data-title=\"%s\" data-x-title=\"%s\" data-y-title=\"%s\" data-step-size=\"%s\" data-chart-data=\"%s\"></bar-chart>",
+        "</div>"
+      );
+    }
+    else
+    {
+      strncpy(
+        bar_chart_template,
+        "<bar-chart data-title=\"%s\" data-x-title=\"%s\" data-y-title=\"%s\" data-step-size=\"%s\" data-chart-data=\"%s\"></bar-chart>",
+        117
+      );
+    }
+
     snprintf(
       bar_chart_html, buffer_size, 
-      "<bar-chart data-title=\"%s\" data-step-size=\"%s\" data-chart-data=\"%s\"></bar-chart>",
+      bar_chart_template,
       chart_title.c_str(),
+      chart_x_title.c_str(),
+      chart_y_title.c_str(),
       server.arg("step_size").c_str(),
       chart_data.c_str()
     );
   }
   else
   {
+    if (chartShouldHaveContainer)
+    {
+      snprintf(
+        bar_chart_template, buffer_size,
+        "%s %s %s",
+        "<div class=\"chart-container\">",
+        "<bar-chart data-title=\"%s\" data-x-title=\"%s\" data-y-title=\"%s\" data-chart-data=\"%s\"></bar-chart>",
+        "</div>"
+      );
+    }
+    else
+    {
+      strncpy(
+        bar_chart_template,
+        "<bar-chart data-title=\"%s\" data-x-title=\"%s\" data-y-title=\"%s\" data-chart-data=\"%s\"></bar-chart>",
+        97
+      );
+    }
+
     snprintf(
       bar_chart_html, buffer_size, 
-      "<bar-chart data-title=\"%s\" data-chart-data=\"%s\"></bar-chart>",
+      bar_chart_template,
       chart_title.c_str(),
+      chart_x_title.c_str(),
+      chart_y_title.c_str(),
       chart_data.c_str()
     );
   }
@@ -294,15 +433,12 @@ void handleData()
   const static char TAG[14] = "DATA ENDPOINT";
   ESP_LOGI(TAG, "Hit");
 
-  HTTPClient http;
-  http.begin("https://servicodados.ibge.gov.br/api/v1/paises/BR/indicadores/77849");
-  int code = http.GET();
-
-  String response = http.getString();
-  server.sendHeader("Content-Encoding", "gzip");
-  server.send(200, "application/json", response);
-
-  http.end();
+  fs::File chart_page = FFat.open("/chart_page.html", FILE_READ);
+  if (chart_page)
+  {
+    server.send(200, "text/html", chart_page.readString());
+  }
+  chart_page.close(); 
 }
 
 void handleNotFound()

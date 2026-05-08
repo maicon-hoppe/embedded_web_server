@@ -1,7 +1,7 @@
-#ifndef UNIQUE_INDEX_HTML
-#define UNIQUE_INDEX_HTML
+#ifndef UNIQUE_CHART_PAGE_HTML
+#define UNIQUE_CHART_PAGE_HTML
 
-const static char index_html_str[] = R"EOF(
+const static char chart_page_html_str[] = R"EOF(
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -10,12 +10,10 @@ const static char index_html_str[] = R"EOF(
     <link rel="stylesheet" href="/static/css/global.css">
     <script src="/static/libs/chart.umd.min.js"></script>
     <script src="/static/libs/htmx.min.js"></script>
-    <script defer type="module" src="/static/js/utils.js"></script>
     <script defer type="module" src="/static/js/line_chart.js"></script>
     <script defer type="module" src="/static/js/bar_chart.js"></script>
-    <script defer type="module" src="/static/js/index.js"></script>
+    <script defer type="module" src="/static/js/chart_page.js"></script>
     <link rel="shortcut icon" href="/static/logo.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/static/css/index.css">
     <title>Estatísticas</title>
 </head>
 <body>
@@ -23,10 +21,6 @@ const static char index_html_str[] = R"EOF(
         <div id="chart-box">
             <canvas id="graph"></canvas>
         </div>
-        <style>
-            :host { display: block; }
-            #chart-box { height: 100%; }
-        </style>
     </template>
     <header>
         <span>
@@ -42,12 +36,8 @@ const static char index_html_str[] = R"EOF(
             </svg>
             <h1>Estatísticas</h1>
         </span>
-        <span>
-            <input id="ipea_data_text" type="text">
-            <input id="ipea_data_button" class="default-button" type="button" value="Enviar">
-        </span>
     </header>
-
+    <hr>
     <main></main>
 </body>
 </html>)EOF";

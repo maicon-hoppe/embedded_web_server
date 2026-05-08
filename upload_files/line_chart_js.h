@@ -27,10 +27,6 @@ class LineChart extends HTMLElement {
     connectedCallback()
     {
         const chartCanvas = this.shadowRoot.querySelector("canvas");
-
-        console.log(this.dataset);
-        console.log(`chartData -> ${this.dataset.chartData}`);
-
         const chart = new Chart(chartCanvas, {
             type: "line",
             data: JSON.parse(this.dataset.chartData),
@@ -49,7 +45,7 @@ class LineChart extends HTMLElement {
                     x: {
                         title: {
                             display: true,
-                            text: "Dia",
+                            text: this.dataset.xTitle,
                             color: systemColors.text,
                         },
                         ticks: {
@@ -62,7 +58,7 @@ class LineChart extends HTMLElement {
                         beginAtZero: JSON.parse(this.dataset.beginAtZero),
                         title: {
                             display: true,
-                            text: "Despesas",
+                            text: this.dataset.yTitle,
                             color: systemColors.text,
                         },
                         ticks: {

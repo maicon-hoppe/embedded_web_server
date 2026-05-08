@@ -35,7 +35,7 @@ class BarChart extends HTMLElement {
                     x: {
                         title: {
                             display: true,
-                            text: "Valor dos contratos",
+                            text: this.dataset.xTitle,
                             color: systemColors.text,
                         },
                         ticks: {
@@ -47,7 +47,7 @@ class BarChart extends HTMLElement {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: "Quantidade de contratos",
+                            text: this.dataset.yTitle,
                             color: systemColors.text,
                         },
                         ticks: {
