@@ -22,7 +22,7 @@ export const darkTheme = matchMedia('(prefers-color-scheme: dark)');
 export const systemColors = {
     primaryColor: "hsl(59, 50%, 39%)",
     secondaryColor: "hsl(57, 20%, 21%)",
-    text: darkTheme.matches ? "hsl(0 0 90)" : "hsl(0 0 10)",
+    text: darkTheme.matches ? "hsl(0 0 85)" : "hsl(0 0 15)",
     accent: "hsl(59, 100%, 46%)",
     accentTransparent: "hsla(59 100 46 / 0.5)",
 };

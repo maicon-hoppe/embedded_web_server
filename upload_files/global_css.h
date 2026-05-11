@@ -18,9 +18,9 @@ const static char global_css_str[] = R"EOF(
     --background: light-dark(hsl(0 0 90), hsl(0 0 10));
     --background-10: light-dark(hsl(0 0 85), hsl(0 0 15));
 
-    --text-color: light-dark(hsl(0 0 15), white);
+    --text-color: light-dark(hsl(0 0 15), hsl(0 0 85));
     --light-text-color: hsl(0 0 15);
-    --dark-text-color: white;
+    --dark-text-color: hsl(0 0 85);
 
     --heading-size: 2.5rem;
     --text-size: 1rem;
@@ -45,39 +45,89 @@ const static char global_css_str[] = R"EOF(
     color: var(--text-color);
     background-color: var(--background);
 
+    a {
+        position: static;
+    }
+
+    hr { border-color: var(--text-color); }
+
+    input[type="text"] {
+        height: 30px;
+        padding: 5px 10px;
+        border: none;
+        border-radius: var(--default-bradius);
+
+        background-color: var(--background-10);
+
+        &:hover {
+            padding: 4px 9px;
+            border: 1px solid var(--text-color);
+        }
+
+        &:focus-visible {
+            padding: 3px 8px;
+            border: 2px solid var(--text-color);
+            outline: none;
+        }
+    }
+
+    select {
+        height: 30px;
+        padding-left: 5px;
+        border-color: var(--background-10);
+        border-top-left-radius: var(--default-bradius);
+        border-bottom-left-radius: var(--default-bradius);
+
+        background-color: var(--background-10);
+
+        &:is(:hover, :focus-visible) {
+            border-color: var(--text-color);
+            outline: none;
+        }
+
+        option {
+            border-radius: var(--default-bradius);
+            background-color: var(--background-10);
+        }
+    }
+
+    svg {
+        height: 32px;
+        width: 32px;
+        fill: none;
+        stroke: var(--text-color);
+    }
+
     header {
         display: flex;
         flex-flow: row nowrap;
         justify-content: space-between;
         height: 8dvh;
+        padding: 0px 8px;
 
         background-image: linear-gradient(
-            180deg,
+            90deg,
             var(--primary-color),
-            var(--background)
+            var(--secondary-color)
         );
 
-        span {
-            & > * { display: inline; }
-
-            svg#logo {
-                height: 32px;
-                width: 32px;
-                fill: none;
-                stroke: var(--text-color);
-            }
-
-            h1 { font-size: var(--heading-size); }
+        a {
+            display: inline;
+            color: var(--text-color);
+            font-weight: bold;
+            font-size: var(--heading-size);
+            text-decoration: none;
         }
     }
 
-    hr { border-color: var(--text-color); }
     main { height: 92dvh; }
 
     .light-mode { color-scheme: only light; }
     .dark-mode { color-scheme: only dark; }
 
     .chart-container {
+        /* min-height: 284px; */
+        min-width: 561px;
         padding: var(--text-spacing);
 
         border-radius: var(--default-bradius);
@@ -86,7 +136,7 @@ const static char global_css_str[] = R"EOF(
 
     .default-button {
         display: inline-block;
-        padding: 8px;
+        padding: 5px 8px;
 
         cursor: pointer;
         user-select: none;
@@ -103,11 +153,23 @@ const static char global_css_str[] = R"EOF(
         }
 
         &:hover {
-            background-color: var(--primary-color-20);
+            background-color: var(--secondary-color-20);
         }
 
         &:active {
-            background-color: var(--secondary-color-20);
+            background-color: var(--primary-color-20);
+        }
+
+        &.alt {
+            background-color: var(--secondary-color);
+
+            &:hover {
+                background-color: var(--primary-color-20);
+            }
+
+            &:active {
+                background-color: var(--secondary-color-20);
+            }
         }
     }
 })EOF";

@@ -1,7 +1,7 @@
-#ifndef UNIQUE_INDEX_HTML
-#define UNIQUE_INDEX_HTML
+#ifndef UNIQUE_METEO_PAGE_HTML
+#define UNIQUE_METEO_PAGE_HTML
 
-const static char index_html_str[] = R"EOF(
+const static char meteo_page_html_str[] = R"EOF(
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -10,24 +10,13 @@ const static char index_html_str[] = R"EOF(
     <link rel="stylesheet" href="/static/css/global.css">
     <script src="/static/libs/chart.umd.min.js"></script>
     <script src="/static/libs/htmx.min.js"></script>
-    <script defer type="module" src="/static/js/utils.js"></script>
     <script defer type="module" src="/static/js/line_chart.js"></script>
     <script defer type="module" src="/static/js/bar_chart.js"></script>
-    <script defer type="module" src="/static/js/index.js"></script>
+    <script defer type="module" src="/static/js/meteo_page.js"></script>
     <link rel="shortcut icon" href="/static/logo.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/static/css/index.css">
     <title>Estatísticas</title>
 </head>
 <body>
-    <template id="chart">
-        <div id="chart-box">
-            <canvas id="graph"></canvas>
-        </div>
-        <style>
-            :host { display: block; }
-            #chart-box { height: 100%; }
-        </style>
-    </template>
     <header>
         <a href="/" title="Home">
             <svg id="logo"
@@ -41,19 +30,10 @@ const static char index_html_str[] = R"EOF(
                 <path d="m19 9-5 5-4-4-3 3"/>
             </svg>
         </a>
-        <span>
-            <select id="ipea_data_region">
-                <option value="Regiões">Regiões</option>
-                <option value="Estados" selected>Estados</option>
-                <option value="Área_Metropolitana">Área metropolitana</option>
-            </select>
-            <input id="ipea_data_text" type="text" placeholder="Código IPEA">
-            <input id="ipea_data_button" class="default-button" type="button" value="Enviar">
-        </span>
     </header>
     <hr>
-    <main></main>
 </body>
-</html>)EOF";
+</html>
+)EOF";
 
 #endif

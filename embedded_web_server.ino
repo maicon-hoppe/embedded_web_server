@@ -3,9 +3,12 @@
 #include <ESPmDNS.h>
 #include <FFat.h>
 #include <FS.h>
+#include <HTTPClient.h>
 #include <WebServer.h>
 #include <WiFi.h>
 #include <uri/UriBraces.h>
+
+#include <NetworkClientSecure.h>
 
 #include "secrets.h"
 
@@ -16,6 +19,7 @@ void handlePlace();
 void handleLineChart();
 void handleBarChart();
 void handleData();
+void handleMeteo();
 void handleNotFound();
 
 WebServer server(80);
@@ -95,7 +99,8 @@ void setup() {
   server.on("/place", HTTP_GET, handlePlace);
   server.on("/line_chart", HTTP_GET, handleLineChart);
   server.on("/bar_chart", HTTP_GET, handleBarChart);
-  server.on(UriBraces("/data/{}"), HTTP_GET, handleData);
+  server.on(UriBraces("/data/{}/{}"), HTTP_GET, handleData);
+  server.on(UriBraces("/meteo/{}"), HTTP_GET, handleMeteo);
   server.onNotFound(handleNotFound);
 
   server.begin();
@@ -439,6 +444,69 @@ void handleData()
     server.send(200, "text/html", chart_page.readString());
   }
   chart_page.close(); 
+}
+
+const char ca_cert[] = R"is_a_string(
+-----BEGIN CERTIFICATE-----
+MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4G
+A1UECxMXR2xvYmFsU2lnbiBSb290IENBIC0gUjMxEzARBgNVBAoTCkdsb2JhbFNp
+Z24xEzARBgNVBAMTCkdsb2JhbFNpZ24wHhcNMDkwMzE4MTAwMDAwWhcNMjkwMzE4
+MTAwMDAwWjBMMSAwHgYDVQQLExdHbG9iYWxTaWduIFJvb3QgQ0EgLSBSMzETMBEG
+A1UEChMKR2xvYmFsU2lnbjETMBEGA1UEAxMKR2xvYmFsU2lnbjCCASIwDQYJKoZI
+hvcNAQEBBQADggEPADCCAQoCggEBAMwldpB5BngiFvXAg7aEyiie/QV2EcWtiHL8
+RgJDx7KKnQRfJMsuS+FggkbhUqsMgUdwbN1k0ev1LKMPgj0MK66X17YUhhB5uzsT
+gHeMCOFJ0mpiLx9e+pZo34knlTifBtc+ycsmWQ1z3rDI6SYOgxXG71uL0gRgykmm
+KPZpO/bLyCiR5Z2KYVc3rHQU3HTgOu5yLy6c+9C7v/U9AOEGM+iCK65TpjoWc4zd
+QQ4gOsC0p6Hpsk+QLjJg6VfLuQSSaGjlOCZgdbKfd/+RFO+uIEn8rUAVSNECMWEZ
+XriX7613t2Saer9fwRPvm2L7DWzgVGkWqQPabumDk3F2xmmFghcCAwEAAaNCMEAw
+DgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFI/wS3+o
+LkUkrk1Q+mOai97i3Ru8MA0GCSqGSIb3DQEBCwUAA4IBAQBLQNvAUKr+yAzv95ZU
+RUm7lgAJQayzE4aGKAczymvmdLm6AC2upArT9fHxD4q/c2dKg8dEe3jgr25sbwMp
+jjM5RcOO5LlXbKr8EpbsU8Yt5CRsuZRj+9xTaGdWPoO4zzUhw8lo/s7awlOqzJCK
+6fBdRoyV3XpYKBovHd7NADdBj+1EbddTKJd+82cEHhXXipa0095MJ6RMG3NzdvQX
+mcIfeg7jLQitChws/zyrVQ4PkX4268NXSb7hLi18YIvDQVETI53O9zJrlAGomecs
+Mx86OyXShkDOOyyGeMlhLxS67ttVb9+E7gUJTb0o2HLO02JQZR7rkpeDMdmztcpH
+WD9f
+-----END CERTIFICATE-----
+)is_a_string";
+
+void handleMeteo()
+{
+  const static char TAG[15] = "METEO ENDPOINT";
+  ESP_LOGI(TAG, "Hit");
+
+  /* NetworkClientSecure* client = new NetworkClientSecure;
+  client->setCACert(ca_cert);
+  // client->setInsecure();
+
+  HTTPClient http;
+  http.begin(*client, // O problema é o cors?
+    "https://panorama.sipam.gov.br/api/meteorologia/v1/previsao/tempo?token=vGJ6ESuSPniKednMPaFKUgkYimcULHpgJDJ5JDEyJFI2UEpCSGtJeVBZL0E0RnJWSy9scWUzMzNmRTZURDNUUGZhL1IxLzguNnNBb2lLaWtpLjdD&data=10%2F05%2F2026&hora=1&municipio_id=1503606"
+  );
+  http.addHeader("Content-Type", "application/json");
+  // http.addHeader("X-CSRF-TOKEN", "kADLcqbnN1rRmQwTuz2pKkc3va3W12IdD0ehwwED");
+  int8_t http_code = http.GET();
+  if (http_code > 0)
+  {
+    if (http_code == HTTP_CODE_OK)
+    {
+      Serial.println("FOI ");
+      Serial.println(http.getString());
+    }
+  }
+  else
+  {
+    Serial.print("ERRO ");
+    Serial.println(http_code);
+    Serial.println(http.errorToString(http_code));
+  }
+  http.end(); */
+  fs::File meteo_page = FFat.open("/meteo_page.html", FILE_READ);
+  if (meteo_page)
+  {
+    server.send(200, "text/html", meteo_page.readString());
+  }
+  meteo_page.close();
 }
 
 void handleNotFound()

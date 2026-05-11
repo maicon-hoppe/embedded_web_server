@@ -63,8 +63,8 @@ IBGEDB.promiseIsEmpty().then((dbIsEmpty) =>
 
         const exportLineChart = document.createElement("line-chart");
         exportLineChart.dataset.title = "EXPORTAÇÃO (US$)";
-        exportLineChart.dataset.xTitle = "Valor";
-        exportLineChart.dataset.yTitle = "Ano";
+        exportLineChart.dataset.xTitle = "Ano";
+        exportLineChart.dataset.yTitle = "Valor";
         exportLineChart.dataset.beginAtZero = "true";
         exportLineChart.dataset.displayPoints = "false";
         exportLineChart.dataset.chartData = JSON.stringify({
@@ -158,90 +158,23 @@ IBGEDB.promiseIsEmpty().then((dbIsEmpty) =>
     }
 });
 
+const ipeaDataRegion = document.querySelector("#ipea_data_region");
 const ipeaDataText = document.querySelector("#ipea_data_text");
 const ipeaDataButton = document.querySelector("#ipea_data_button");
-const ipeaComent = document.createElement("p");
-ipeaComent.id = "comentario";
-
-const territories = {};
-const ipeaSeriesValues = {};
-let chartTitle;
-let chartXTitle;
-let chartYTitle;
-
-const getData = async function(event)
+ipeaDataText.addEventListener("keydown", (event) =>
 {
-    location.assign(`/data/${ipeaDataText.value}`);
-
-    /* const response = await fetch(`http://www.ipeadata.gov.br/api/odata4/Metadados('${ipeaDataText.value}')`);
-    const ipeaData = await response.json();
-
-    chartTitle = ipeaData.value[0].SERNOME.toUpperCase();
-    chartYTitle = ipeaData.value[0].UNINOME;
-
-    if (ipeaData.value.length > 0)
+    if (event.key === "Enter" && ipeaDataText.value)
     {
-        ipeaComent.innerHTML = ipeaData.value[0].SERCOMENTARIO;
-        mainElement.replaceChildren(ipeaComent);
-
-        const responseSeries = await fetch(`http://www.ipeadata.gov.br/api/odata4/Metadados('${ipeaDataText.value}')/Valores`);
-        const ipeaSeries = await responseSeries.json();
-
-        for (const dataEntry of ipeaSeries.value)
-        {
-            if (!territories[dataEntry.NIVNOME])
-            {
-                territories[dataEntry.NIVNOME] = [];
-            }
-
-            chartXTitle = "Estados";
-            if (dataEntry.NIVNOME === chartXTitle)
-            {
-                ipeaSeriesValues[dataEntry.TERCODIGO] = dataEntry.VALVALOR;
-                let ipeaPlace = territories[dataEntry.NIVNOME].find((TERCODIGO) => TERCODIGO[dataEntry.TERCODIGO]);
-                if (!ipeaPlace)
-                {
-                    const placeResponse = await fetch(
-                        `http://www.ipeadata.gov.br/api/odata4/Territorios(TERCODIGO='${dataEntry.TERCODIGO}',NIVNOME='${dataEntry.NIVNOME}')`
-                    );
-                    const placeData = await placeResponse.json();
-                    territories[dataEntry.NIVNOME].push({ [dataEntry.TERCODIGO]: placeData.value[0].TERNOME });
-                }
-            }
-        }
-
-        const requestURL = "/bar_chart";
-        const BarChartsearchParams = new URLSearchParams();
-        BarChartsearchParams.append("contained", "true");
-        BarChartsearchParams.append("title", chartTitle);
-        BarChartsearchParams.append("x_title", chartXTitle);
-        BarChartsearchParams.append("y_title", chartYTitle);
-        BarChartsearchParams.append("labels",
-            JSON.stringify(territories[chartXTitle].map(data => Object.values(data)[0]))
-        );
-        BarChartsearchParams.append("coordinate_label", "Porcentagem");
-        BarChartsearchParams.append("coordinates", 
-            JSON.stringify(
-                Object.entries(ipeaSeriesValues)
-                    .map(([key, value]) => ({ x: +key, y: +value }))
-            )
-        );
-
-        const requestShape = requestURL + "?" + BarChartsearchParams.toString();
-        htmx.ajax('GET', requestShape, {
-            target: "main",
-            swap: "beforeend"
-        });
+        location.assign(`/data/${ipeaDataRegion.selectedOptions[0].value}/${ipeaDataText.value}`);
     }
-    else
+});
+ipeaDataButton.addEventListener("click", (event) =>
+{
+    if (ipeaDataText.value)
     {
-        ipeaComent.innerText = "Nenhum dado encontrado.";
-        mainElement.replaceChildren(ipeaComent);
-    } */
-}
-
-ipeaDataText.addEventListener("keydown", (event) => { if (event.key === "Enter") { getData() } });
-ipeaDataButton.addEventListener("click", getData);
+        location.assign(`/data/${ipeaDataRegion.selectedOptions[0].value}/${ipeaDataText.value}`);
+    }
+});
 )EOF";
 
 #endif
